@@ -10,6 +10,7 @@ import net.runelite.api.GameState;
 import net.runelite.api.Item;
 import net.runelite.api.ItemContainer;
 import net.runelite.api.events.ClientTick;
+import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.gameval.InventoryID;
@@ -26,8 +27,8 @@ import net.runelite.client.ui.overlay.OverlayManager;
 
 @PluginDescriptor(
 	name = "Mirror Tabs",
-	description = "Displays inventory and equipment together",
-	tags = {"inventory", "equipment", "interface", "tabs"}
+	description = "Displays inventory and equipment together with item charges",
+	tags = {"inventory", "equipment", "interface", "tabs", "charges"}
 )
 public class MirrorTabsPlugin extends Plugin
 {
@@ -60,6 +61,9 @@ public class MirrorTabsPlugin extends Plugin
 	private MirrorTabsOverlay overlay;
 
 	@Inject
+	private MirrorItemChargeResolver itemChargeResolver;
+
+	@Inject
 	private SpriteManager spriteManager;
 
 	@Override
@@ -69,6 +73,18 @@ public class MirrorTabsPlugin extends Plugin
 		equipmentInitialized = false;
 		spritesInitialized = false;
 		overlayManager.add(overlay);
+	}
+
+	@Subscribe
+	public void onGameTick(GameTick event)
+	{
+		if (client.getGameState() != GameState.LOGGED_IN)
+		{
+			return;
+		}
+
+		refreshCharges(MirrorTabState.INVENTORY, client.getItemContainer(InventoryID.INV));
+		refreshCharges(MirrorTabState.EQUIPMENT, client.getItemContainer(InventoryID.WORN));
 	}
 
 	@Override
@@ -188,7 +204,16 @@ public class MirrorTabsPlugin extends Plugin
 
 		Item[] items = itemContainer.getItems();
 		overlay.setItems(state, Arrays.copyOf(items, items.length));
+		overlay.setItemCharges(state, itemChargeResolver.resolve(items));
 		return true;
+	}
+
+	private void refreshCharges(MirrorTabState state, ItemContainer itemContainer)
+	{
+		if (itemContainer != null)
+		{
+			overlay.setItemCharges(state, itemChargeResolver.resolve(itemContainer.getItems()));
+		}
 	}
 
 	private static boolean isVisible(Widget widget)

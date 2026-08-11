@@ -61,4 +61,15 @@ public interface MirrorTabsConfig extends Config
 	{
 		return true;
 	}
+
+	@ConfigItem(
+		keyName = "showItemCharges",
+		name = "Show item charges",
+		description = "Shows remaining charges and doses on mirrored items",
+		position = 4
+	)
+	default boolean showItemCharges()
+	{
+		return true;
+	}
 }

@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import net.runelite.api.EquipmentInventorySlot;
 import net.runelite.api.Item;
 import net.runelite.client.game.ItemManager;
+import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
@@ -44,7 +45,9 @@ public class MirrorTabsOverlay extends Overlay
 	private static final Color OUTER_BORDER = new Color(39, 31, 22);
 	private static final Color INNER_BORDER = new Color(145, 122, 78);
 	private static final Color LABEL_COLOR = new Color(238, 224, 184);
+	private static final Color CHARGE_COLOR = Color.YELLOW;
 	private static final Item[] EMPTY_ITEMS = new Item[0];
+	private static final int[] EMPTY_CHARGES = new int[0];
 
 	private static final EquipmentSlotLayout[] EQUIPMENT_LAYOUT =
 	{
@@ -67,6 +70,8 @@ public class MirrorTabsOverlay extends Overlay
 	private volatile MirrorTabState mirroredState = MirrorTabState.EQUIPMENT;
 	private volatile Item[] inventoryItems = EMPTY_ITEMS;
 	private volatile Item[] equipmentItems = EMPTY_ITEMS;
+	private volatile int[] inventoryCharges = EMPTY_CHARGES;
+	private volatile int[] equipmentCharges = EMPTY_CHARGES;
 	private volatile BufferedImage inventoryIcon;
 	private volatile BufferedImage equipmentIcon;
 	private volatile BufferedImage[] equipmentPlaceholders = new BufferedImage[14];
@@ -161,6 +166,18 @@ public class MirrorTabsOverlay extends Overlay
 		}
 	}
 
+	void setItemCharges(MirrorTabState state, int[] charges)
+	{
+		if (state == MirrorTabState.INVENTORY)
+		{
+			inventoryCharges = charges;
+		}
+		else
+		{
+			equipmentCharges = charges;
+		}
+	}
+
 	void setInterfaceSprites(BufferedImage inventoryIcon, BufferedImage equipmentIcon, BufferedImage[] placeholders)
 	{
 		this.inventoryIcon = inventoryIcon;
@@ -174,6 +191,8 @@ public class MirrorTabsOverlay extends Overlay
 		mirroredState = MirrorTabState.EQUIPMENT;
 		inventoryItems = EMPTY_ITEMS;
 		equipmentItems = EMPTY_ITEMS;
+		inventoryCharges = EMPTY_CHARGES;
+		equipmentCharges = EMPTY_CHARGES;
 		inventoryIcon = null;
 		equipmentIcon = null;
 		equipmentPlaceholders = new BufferedImage[14];
@@ -261,6 +280,7 @@ public class MirrorTabsOverlay extends Overlay
 			int x = startX + column * (slotWidth + horizontalGap);
 			int y = startY + row * (slotHeight + verticalGap);
 			drawItem(graphics, getItem(items, slot), x, y, slotWidth, slotHeight);
+			drawCharge(graphics, getCharge(inventoryCharges, slot), x, y, slotWidth, slotHeight);
 		}
 	}
 
@@ -298,6 +318,7 @@ public class MirrorTabsOverlay extends Overlay
 			else
 			{
 				drawItem(graphics, item, x, y, slotWidth, slotHeight);
+				drawCharge(graphics, getCharge(equipmentCharges, slotIndex), x, y, slotWidth, slotHeight);
 			}
 		}
 	}
@@ -328,6 +349,27 @@ public class MirrorTabsOverlay extends Overlay
 		}
 	}
 
+	private void drawCharge(Graphics2D graphics, int charges, int x, int y, int slotWidth, int slotHeight)
+	{
+		if (!config.showItemCharges() || charges == MirrorItemChargeResolver.NO_CHARGES)
+		{
+			return;
+		}
+
+		String text = charges == MirrorItemChargeResolver.UNKNOWN_CHARGES ? "?" : String.valueOf(charges);
+		double scale = Math.min((double) slotWidth / 36, (double) slotHeight / 28);
+		float fontSize = (float) Math.max(9.0, Math.min(18.0, 12.0 * scale));
+		graphics.setFont(FontManager.getRunescapeSmallFont().deriveFont(fontSize));
+		FontMetrics metrics = graphics.getFontMetrics();
+		int textX = x + 1;
+		int textY = y + Math.min(slotHeight - 1, metrics.getAscent() + 1);
+
+		graphics.setColor(Color.BLACK);
+		graphics.drawString(text, textX + 1, textY + 1);
+		graphics.setColor(CHARGE_COLOR);
+		graphics.drawString(text, textX, textY);
+	}
+
 	private static void drawContainedImage(Graphics2D graphics, BufferedImage image, int x, int y, int width, int height)
 	{
 		double imageScale = Math.min(
@@ -344,6 +386,13 @@ public class MirrorTabsOverlay extends Overlay
 	private static Item getItem(Item[] items, int slot)
 	{
 		return slot >= 0 && slot < items.length ? items[slot] : null;
+	}
+
+	private static int getCharge(int[] charges, int slot)
+	{
+		return slot >= 0 && slot < charges.length
+			? charges[slot]
+			: MirrorItemChargeResolver.NO_CHARGES;
 	}
 
 	private static final class EquipmentSlotLayout
