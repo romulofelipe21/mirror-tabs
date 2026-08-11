@@ -4,7 +4,7 @@ Plugin externo para RuneLite que mostra inventário e equipamento ao mesmo tempo
 
 Quando a aba de inventário está selecionada, o overlay mostra os itens equipados. Quando a aba de equipamento está selecionada, o overlay mostra o inventário. O último espelho permanece visível mesmo se o painel lateral do jogo for recolhido ou o painel de configurações do RuneLite for aberto.
 
-O espelho acompanha automaticamente a aba ativa. A janela pode ser movida e redimensionada livremente com o gerenciador de overlays do RuneLite. Os slots e itens espelhados permanecem somente para leitura: não equipam, usam, movem ou descartam itens e não enviam ações ao servidor.
+O espelho acompanha automaticamente a aba ativa e mostra cargas ou doses conhecidas sobre os itens. A janela pode ser movida e redimensionada livremente com o gerenciador de overlays do RuneLite. Os slots e itens espelhados permanecem somente para leitura: não equipam, usam, movem ou descartam itens e não enviam ações ao servidor.
 
 ## Requisitos
 
@@ -53,11 +53,14 @@ Para testar:
 1. Abra a aba de inventário e confirme que o equipamento aparece no overlay.
 2. Abra a aba de equipamento e confirme que o inventário aparece no overlay.
 3. Equipe, desequipe, mova ou empilhe itens e confirme que o espelho é atualizado.
-4. Segure `Alt`, arraste o interior da janela e confirme que ela pode ser posicionada livremente.
-5. Ainda segurando `Alt`, arraste uma borda ou um canto da janela e confirme que o conteúdo se adapta ao novo tamanho.
-6. Confirme que os slots e itens do overlay não respondem a cliques.
+4. Equipe uma joia com cargas e confirme que a carga aparece no canto do item espelhado.
+5. Segure `Alt`, arraste o interior da janela e confirme que ela pode ser posicionada livremente.
+6. Ainda segurando `Alt`, arraste uma borda ou um canto da janela e confirme que o conteúdo se adapta ao novo tamanho.
+7. Confirme que os slots e itens do overlay não respondem a cliques.
 
 O RuneLite salva a posição e o tamanho escolhidos. Para restaurar o posicionamento padrão, segure `Alt` e clique com o botão direito sobre o overlay. Se você alterou o atalho de movimentação de overlays nas configurações do RuneLite, use o atalho configurado no lugar de `Alt`.
+
+Joias de teleporte, poções e outras variantes com carga identificável são exibidas diretamente. Itens cuja carga é aprendida por mensagens do jogo usam os dados locais do plugin nativo `Item Charges`; nesses casos, o espelho mostra `?` até o RuneLite conhecer o valor.
 
 Para entrar com uma Jagex Account no cliente de desenvolvimento, siga o guia oficial: [Using Jagex Accounts](https://github.com/runelite/runelite/wiki/Using-Jagex-Accounts).
 
@@ -67,6 +70,7 @@ Para entrar com uma Jagex Account no cliente de desenvolvimento, siga o guia ofi
 - `overlayOpacity`: ajusta a opacidade entre 0% e 100%.
 - `overlayScale`: define a escala inicial entre 50% e 200%; depois, o tamanho escolhido ao arrastar as bordas fica salvo pelo RuneLite.
 - `showLabels`: mostra ou esconde o texto do overlay.
+- `showItemCharges`: mostra ou esconde cargas e doses nos itens espelhados.
 
 ## Estrutura principal
 
